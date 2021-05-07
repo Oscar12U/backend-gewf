@@ -1,18 +1,24 @@
 const mongoose = require("mongoose")
-const { MONGO_URI } = require("./config")
+const { MONGO_URI, PORT } = require("./config")
 const { Entrenamiento } = require("./models")
+const server = require("./server")
 
-mongoose.connect(MONGO_URI, { useNewUrlParser: true })
 
-const entrenamiento = new Entrenamiento({
-    title: "Entrenamiento 1"
-})
-entrenamiento.save((err, document) => {
-    if (err) console.log(err);
-    console.log(document)
-})
+const webserver = server.listen(PORT, function () {
+    console.log("Corriendo web server");
+});
 
-console.log(entrenamiento)
+// mongoose.connect(MONGO_URI, { useNewUrlParser: true })
+
+// const entrenamiento = new Entrenamiento({
+//     title: "Entrenamiento 1"
+// })
+// entrenamiento.save((err, document) => {
+//     if (err) console.log(err);
+//     console.log(document)
+// })
+
+// console.log(entrenamiento)
 // Entrenamiento.save(entrenamiento).then(() => {
 //     console.log("Se creó esa vara");
 //     mongoose.disconnect();
