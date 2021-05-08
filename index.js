@@ -4,11 +4,16 @@ const { Entrenamiento } = require("./models")
 const server = require("./server")
 
 
-const webserver = server.listen(PORT, function () {
-    console.log("Corriendo web server");
-});
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true,}).then(() => {
+    server.listen(PORT, function () {
+        console.log("Corriendo web server " + PORT);
+    });
+}).catch(console.log)
 
-// mongoose.connect(MONGO_URI, { useNewUrlParser: true })
+
+
+
+
 
 // const entrenamiento = new Entrenamiento({
 //     title: "Entrenamiento 1"
