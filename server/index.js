@@ -43,6 +43,8 @@ server.get("/api/entrenamientos/search/:name", async (req, res) => {
 
 
 
+ 
+
 //  router.post("/posts", async (req, res) => {
 // 	const post = new Post({
 // 		title: req.body.title,
