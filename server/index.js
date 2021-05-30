@@ -1,6 +1,6 @@
 const express = require("express");
 const server = express();
-const { Entrenamiento, Lesion } = require("../models");
+const { Entrenamiento, Lesion, Jugador } = require("../models");
 const cors = require("cors");
 
 server.use(express.json());
@@ -50,6 +50,35 @@ server.post("/api/newLesion", async (req, res) => {
     res.send(lesion);
 })
 
+server.post("/api/newJugador", async (req, res) => {
+    const jugador = new Jugador({
+        nombre: req.body.nombre,
+        cantGoles: req.body.cantGoles,
+        cantAsistencias: req.body.cantAsistencias,
+        tiempoMinutosJuego: req.body.tiempoMinutosJuego,
+        cantFaltas: req.body.cantFaltas,
+        jugando: req.body.jugando,
+        lesiones: req.body.lesiones
+    })
+    await jugador.save();
+    res.send(jugador);
+})
+
+// server.get("/api/entrenamientos/:id", async (req, res) => {
+//     const { id } = req.params;
+//     let entrenamiento = await Entrenamiento.findById(id);
+//     console.log(entrenamiento);
+
+//     return res.send({ error: false, data: entrenamiento });
+// });
+
+server.get("/api/jugador/:id", async (req, res) => {
+    const { id } = req.params;
+    let jugador = await Jugador.findById(id);
+    console.log(jugador);
+
+    return res.send({ error: false, data: jugador });
+})
 
 //  router.post("/posts", async (req, res) => {
 // 	const post = new Post({

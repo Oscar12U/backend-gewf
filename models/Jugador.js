@@ -1,11 +1,15 @@
 const mongoose = require("mongoose")
 const { Schema } = mongoose;
 
-const Entrenamiento = new Schema(
+const Jugador = new Schema(
     {
-        name: { type: String },
-        birthday: { type: String },
-        age: { type: int }
+        nombre: { type: String },
+        cantGoles: { type: Number },
+        cantAsistencias: { type: Number },
+        tiempoMinutosJuego: { type: Number },
+        cantFaltas: { type: Number },
+        jugando: { type: Boolean },
+        lesiones: [{ type: Schema.Types.ObjectId, ref: 'lesion' }]
     }
 );
 
