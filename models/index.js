@@ -1,3 +1,4 @@
 module.exports = {
-    Entrenamiento: require("./entrenamiento")
+    Entrenamiento: require("./entrenamiento"),
+    Lesion: require("./lesion")
 };
