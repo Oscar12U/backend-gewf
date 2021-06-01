@@ -1,10 +1,16 @@
 const mongoose = require("mongoose")
 const { Schema } = mongoose;
 
-const Patido = new Schema(
+const Partido = new Schema(
     {
-        title: { type: String },
-
+        nombre: { type: String },
+        descripcion: { type: String },
+        cantGolesFavor: { type: Number },
+        cantGolesContra: { type: Number },
+        faltas: { type: Number },
+        jugadores: [{ type: Schema.Types.ObjectId, ref: 'jugador' }],
+        goles: [{ type: Schema.Types.ObjectId, ref: 'gol' }],
+        fechaPartido: { type: Date }
     }
 );
 

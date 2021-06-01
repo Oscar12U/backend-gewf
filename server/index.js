@@ -1,6 +1,6 @@
 const express = require("express");
 const server = express();
-const { Entrenamiento, Lesion, Jugador, Actividad } = require("../models");
+const { Entrenamiento, Lesion, Jugador, Actividad, Gol, Partido, Temporada } = require("../models");
 const cors = require("cors");
 
 server.use(express.json());
@@ -77,7 +77,7 @@ server.post("/api/newActividad", async (req, res) => {
   res.send(actividad);
 });
 
-server.post("/api/newActividad/:nombre", async (req, res) => {
+server.post("/api/updateActividad/:nombre", async (req, res) => {
   const { id } = req.params;
   let actividad = await Actividad.findOne({
     nombre: req.params.nombre,
@@ -89,7 +89,7 @@ server.post("/api/newActividad/:nombre", async (req, res) => {
   });
 });
 
-server.get("/api/newActividad/:id", async (req, res) => {
+server.get("/api/searchActividad/:id", async (req, res) => {
   const { id } = req.params;
   let actividad = await Actividad.findById(id);
   console.log(actividad);
@@ -100,6 +100,54 @@ server.get("/api/newActividad/:id", async (req, res) => {
 server.get("/api/jugador/:id", async (req, res) => {
   const { id } = req.params;
   let jugador = await Jugador.findById(id);
+  console.log(jugador);
+
+  return res.send({ error: false, data: jugador });
+});
+
+server.post("/api/newGol", async (req, res) => {
+  const gol = new Gol({
+    anotador: req.body.anotador,
+    asistencia: req.body.asistencia,
+    tiempoGol: req.body.tiempoGol,
+    periodoGol: req.body.periodoGol
+  });
+  await gol.save();
+  res.send(gol);
+});
+
+server.post("/api/newPartido", async (req, res) => {
+  const partido = new Partido({
+    nombre: req.body.nombre,
+    descripcion: req.body.descripcion,
+    cantGolesFavor: req.body.cantGolesFavor,
+    cantGolesContra: req.body.cantGolesContra,
+    faltas: req.body.faltas,
+    jugadores: req.body.jugadores,
+    goles: req.body.goles,
+    fechaPartido: req.body.fechaPartido
+  });
+  await partido.save();
+  res.send(partido);
+});
+
+server.post("/api/newTemporada", async (req, res) => {
+  const temporada = new Temporada({
+    nombre: req.body.nombre,
+    descripcion: req.body.descripcion,
+    fechainicio: req.body.fechainicio,
+    fechaFin: req.body.fechaFin,
+    partidos: req.body.partidos,
+    entrenamientos: req.body.entrenamientos
+  });
+  await temporada.save();
+  res.send(temporada);
+});
+
+//Esto es una prueba de borrar => No se recomienda usar porque puede dar problemas
+server.post("/api/deleteJugador/:nombre", async (req, res) => {
+  const { nombre } = req.params;
+  let jugador = await Jugador.findOneAndDelete(nombre);
   console.log(jugador);
 
   return res.send({ error: false, data: jugador });
