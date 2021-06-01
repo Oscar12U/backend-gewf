@@ -1,84 +1,109 @@
 const express = require("express");
 const server = express();
-const { Entrenamiento, Lesion, Jugador } = require("../models");
+const { Entrenamiento, Lesion, Jugador, Actividad } = require("../models");
 const cors = require("cors");
 
 server.use(express.json());
 server.use(cors());
 server.get("/api/entrenamientos/", async (req, res) => {
-    let entrenamiento = await Entrenamiento.find();
-    console.log(entrenamiento);
-    res.send({ data: entrenamiento });
+  let entrenamiento = await Entrenamiento.find();
+  console.log(entrenamiento);
+  res.send({ data: entrenamiento });
 });
 
 server.get("/api/entrenamientos/:id", async (req, res) => {
-    const { id } = req.params;
-    let entrenamiento = await Entrenamiento.findById(id);
-    console.log(entrenamiento);
+  const { id } = req.params;
+  let entrenamiento = await Entrenamiento.findById(id);
+  console.log(entrenamiento);
 
-    return res.send({ error: false, data: entrenamiento });
+  return res.send({ error: false, data: entrenamiento });
 });
 
 server.get("/api/entrenamientos/search/:name", async (req, res) => {
-    const { name } = req.params;
-    let entrenamiento = await Entrenamiento.find(
-        {
-            title: { $regex: new RegExp(name, "i") }
-        }
-    );
-    console.log(entrenamiento);
+  const { name } = req.params;
+  let entrenamiento = await Entrenamiento.find({
+    title: { $regex: new RegExp(name, "i") },
+  });
+  console.log(entrenamiento);
 
-    return res.send({ error: false, entrenamiento });
+  return res.send({ error: false, entrenamiento });
 });
 
 server.post("/api/newEntrenamiento", async (req, res) => {
-    const entrenamiento = new Entrenamiento({
-        title: req.body.title
-    })
+  const entrenamiento = new Entrenamiento({
+    nombre: req.body.nombre,
+    descripcion: req.body.descripcion,
+    jugadores: req.body.jugadores,
+    comentarios: req.body.comentarios,
+    actividades: req.body.actividades,
+    fechaEntrenamiento: req.body.fechaEntrenamiento,
+  });
 
-    await entrenamiento.save();
-    res.send(entrenamiento);
-})
+  await entrenamiento.save();
+  res.send(entrenamiento);
+});
 
 server.post("/api/newLesion", async (req, res) => {
-    const lesion = new Lesion({
-        fechaLesion: req.body.fechaLesion,
-        descripcion: req.body.descripcion
-    })
+  const lesion = new Lesion({
+    fechaLesion: req.body.fechaLesion,
+    descripcion: req.body.descripcion,
+  });
 
-    await lesion.save();
-    res.send(lesion);
-})
+  await lesion.save();
+  res.send(lesion);
+});
 
 server.post("/api/newJugador", async (req, res) => {
-    const jugador = new Jugador({
-        nombre: req.body.nombre,
-        cantGoles: req.body.cantGoles,
-        cantAsistencias: req.body.cantAsistencias,
-        tiempoMinutosJuego: req.body.tiempoMinutosJuego,
-        cantFaltas: req.body.cantFaltas,
-        jugando: req.body.jugando,
-        lesiones: req.body.lesiones
-    })
-    await jugador.save();
-    res.send(jugador);
-})
+  const jugador = new Jugador({
+    nombre: req.body.nombre,
+    cantGoles: req.body.cantGoles,
+    cantAsistencias: req.body.cantAsistencias,
+    tiempoMinutosJuego: req.body.tiempoMinutosJuego,
+    cantFaltas: req.body.cantFaltas,
+    jugando: req.body.jugando,
+    lesiones: req.body.lesiones,
+  });
+  await jugador.save();
+  res.send(jugador);
+});
 
-// server.get("/api/entrenamientos/:id", async (req, res) => {
-//     const { id } = req.params;
-//     let entrenamiento = await Entrenamiento.findById(id);
-//     console.log(entrenamiento);
+server.post("/api/newActividad", async (req, res) => {
+  const actividad = new Actividad({
+    nombre: req.body.nombre,
+    descripcion: req.body.descripcion,
+    tiempoMinutos: req.body.tiempoMinutos,
+  });
+  await actividad.save();
+  res.send(actividad);
+});
 
-//     return res.send({ error: false, data: entrenamiento });
-// });
+server.post("/api/newActividad/:nombre", async (req, res) => {
+  const { id } = req.params;
+  let actividad = await Actividad.findOne({
+    nombre: req.params.nombre,
+  }).then((actividad) => {
+    actividad.nombre = "Hola soy una prueba";
+    actividad.save().then(() => {
+      res.jsonp({ actividad }); // enviamos la boleta de vuelta
+    });
+  });
+});
+
+server.get("/api/newActividad/:id", async (req, res) => {
+  const { id } = req.params;
+  let actividad = await Actividad.findById(id);
+  console.log(actividad);
+
+  return res.send({ error: false, data: actividad });
+});
 
 server.get("/api/jugador/:id", async (req, res) => {
-    const { id } = req.params;
-    let jugador = await Jugador.findById(id);
-    console.log(jugador);
+  const { id } = req.params;
+  let jugador = await Jugador.findById(id);
+  console.log(jugador);
 
-    return res.send({ error: false, data: jugador });
-})
+  return res.send({ error: false, data: jugador });
+});
 
 //  router.post("/posts", async (req, res) => {
 // 	const post = new Post({
@@ -88,6 +113,5 @@ server.get("/api/jugador/:id", async (req, res) => {
 // 	await post.save()
 // 	res.send(post)
 // })
-
 
 module.exports = server;
