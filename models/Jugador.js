@@ -9,7 +9,8 @@ const Jugador = new Schema(
         tiempoMinutosJuego: { type: Number },
         cantFaltas: { type: Number },
         jugando: { type: Boolean },
-        lesiones: [{ type: Schema.Types.ObjectId, ref: 'lesion' }]
+        lesiones: [{ type: Schema.Types.ObjectId, ref: 'lesion' }],
+        activo: { type: Boolean }
     }
 );
 
