@@ -62,6 +62,7 @@ server.post("/api/newJugador", async (req, res) => {
     cantFaltas: req.body.cantFaltas,
     jugando: req.body.jugando,
     lesiones: req.body.lesiones,
+    activo: req.body.activo
   });
   await jugador.save();
   res.send(jugador);
@@ -161,5 +162,11 @@ server.post("/api/deleteJugador/:nombre", async (req, res) => {
 // 	await post.save()
 // 	res.send(post)
 // })
+
+server.get("/api/jugadores/", async (req, res) => {
+  let jugador = await Jugador.find();
+  console.log(jugador);
+  res.send({ data: jugador });
+});
 
 module.exports = server;
