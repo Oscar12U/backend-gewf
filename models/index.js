@@ -7,3 +7,5 @@ module.exports = {
   Gol: require("./Gol"),
   Temporada: require("./Temporada")
 };
+
+

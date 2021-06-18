@@ -13,8 +13,6 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true,})
 
 
 
-
-
 // const entrenamiento = new Entrenamiento({
 //     title: "Entrenamiento 1"
 // })

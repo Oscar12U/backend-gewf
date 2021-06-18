@@ -1,6 +1,14 @@
 const express = require("express");
 const server = express();
-const { Entrenamiento, Lesion, Jugador, Actividad, Gol, Partido, Temporada } = require("../models");
+const {
+  Entrenamiento,
+  Lesion,
+  Jugador,
+  Actividad,
+  Gol,
+  Partido,
+  Temporada,
+} = require("../models");
 const cors = require("cors");
 
 server.use(express.json());
@@ -107,26 +115,44 @@ server.get("/api/jugador/:id", async (req, res) => {
 });
 
 server.post("/api/newGol", async (req, res) => {
+  let anotadorActualizado = await Jugador.updateOne(
+    { _id: req.body.anotador },
+    { $inc: { cantGoles: 1 } }
+  );
+
+  let anotador = await Jugador.findById(req.body.anotador);
+
+  //Obtener el jugador asistente
+
+  let asistenteActualizado = await Jugador.updateOne(
+    { _id: req.body.asistente },
+    { $inc: { cantAsistencias: 1 } }
+  );
+  let asistente = await Jugador.findById(req.body.asistente);
+
+  // Crear Gol
   const gol = new Gol({
-    anotador: req.body.anotador,
-    asistencia: req.body.asistencia,
+    anotador: anotador,
+    asistencia: asistente,
     tiempoGol: req.body.tiempoGol,
-    periodoGol: req.body.periodoGol
+    periodoGol: req.body.periodoGol,
   });
+
   await gol.save();
-  res.send(gol);
+
+  //Agregar el gol al partido especifico
+
+  let partidoActualizado = await Partido.updateOne(
+    { nombre: req.body.nombrePartido },
+    { $push: { goles: gol } }
+  );
 });
 
 server.post("/api/newPartido", async (req, res) => {
   const partido = new Partido({
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
-    cantGolesFavor: req.body.cantGolesFavor,
-    cantGolesContra: req.body.cantGolesContra,
-    faltas: req.body.faltas,
-    jugadores: req.body.jugadores,
-    goles: req.body.goles,
-    fechaPartido: req.body.fechaPartido
+    fechaPartido: req.body.fechaPartido,
   });
   await partido.save();
   res.send(partido);
@@ -139,7 +165,7 @@ server.post("/api/newTemporada", async (req, res) => {
     fechainicio: req.body.fechainicio,
     fechaFin: req.body.fechaFin,
     partidos: req.body.partidos,
-    entrenamientos: req.body.entrenamientos
+    entrenamientos: req.body.entrenamientos,
   });
   await temporada.save();
   res.send(temporada);
