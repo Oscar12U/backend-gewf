@@ -61,16 +61,24 @@ server.post("/api/newLesion", async (req, res) => {
   res.send(lesion);
 });
 
+server.get("/api/lesion/:id", async (req, res) => {
+  const { id } = req.params;
+  let lesion = await Lesion.findById(id);
+  console.log(lesion);
+
+  return res.send({ error: false, data: lesion });
+})
+
 server.post("/api/newJugador", async (req, res) => {
   const jugador = new Jugador({
     nombre: req.body.nombre,
-    cantGoles: req.body.cantGoles,
-    cantAsistencias: req.body.cantAsistencias,
-    tiempoMinutosJuego: req.body.tiempoMinutosJuego,
-    cantFaltas: req.body.cantFaltas,
-    jugando: req.body.jugando,
-    lesiones: req.body.lesiones,
-    activo: req.body.activo
+    cantGoles: 0,
+    cantAsistencias: 0,
+    tiempoMinutosJuego: 0,
+    cantFaltas: 0,
+    jugando: false,
+    lesiones: [],
+    activo: true,
   });
   await jugador.save();
   res.send(jugador);
@@ -113,6 +121,12 @@ server.get("/api/jugador/:id", async (req, res) => {
 
   return res.send({ error: false, data: jugador });
 });
+
+// server.get("/api/getLesionesJugador/:id", async (req, res) => {
+//   const { id } = req.params;
+//   let jugador = await Jugador.findById(id);
+
+// })
 
 server.post("/api/newGol", async (req, res) => {
   let anotadorActualizado = await Jugador.updateOne(
