@@ -67,7 +67,7 @@ server.get("/api/lesion/:id", async (req, res) => {
   console.log(lesion);
 
   return res.send({ error: false, data: lesion });
-})
+});
 
 server.post("/api/newJugador", async (req, res) => {
   const jugador = new Jugador({
@@ -186,12 +186,21 @@ server.post("/api/newTemporada", async (req, res) => {
 });
 
 //Esto es una prueba de borrar => No se recomienda usar porque puede dar problemas
-server.post("/api/deleteJugador/:nombre", async (req, res) => {
-  const { nombre } = req.params;
-  let jugador = await Jugador.findOneAndDelete(nombre);
-  console.log(jugador);
+server.post("/api/deleteJugador", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+  let jugador = await Jugador.findById(req.body.jugador).then((jugador) => {
+    //console.log("todo el mae", jugador);
+    jugador.activo = false;
+    jugador.save().then(() => {
+      res.jsonp({ jugador }); // enviamos la boleta de vuelta
+    });
+  });
 
-  return res.send({ error: false, data: jugador });
+  // const { nombre } = req.params;
+  // let jugador = await Jugador.findOneAndDelete(nombre);
+  // console.log(jugador);
+
+  // return res.send({ error: false, data: jugador });
 });
 
 //  router.post("/posts", async (req, res) => {
