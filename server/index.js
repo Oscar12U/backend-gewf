@@ -122,13 +122,16 @@ server.get("/api/jugador/:id", async (req, res) => {
   return res.send({ error: false, data: jugador });
 });
 
-// server.get("/api/getLesionesJugador/:id", async (req, res) => {
-//   const { id } = req.params;
-//   let jugador = await Jugador.findById(id);
+server.post("/api/newGolContra", async (req, res) => {
+  //Agregar el gol en contra al partido especifico
 
-// })
+  let partidoActualizado = await Partido.updateOne(
+    { nombre: req.body.nombrePartido },
+    { $inc: { cantGolesContra: 1 } }
+  );
+});
 
-server.post("/api/newGol", async (req, res) => {
+server.post("/api/newGolFavor", async (req, res) => {
   let anotadorActualizado = await Jugador.updateOne(
     { _id: req.body.anotador },
     { $inc: { cantGoles: 1 } }
@@ -158,7 +161,7 @@ server.post("/api/newGol", async (req, res) => {
 
   let partidoActualizado = await Partido.updateOne(
     { nombre: req.body.nombrePartido },
-    { $push: { goles: gol } }
+    { $push: { goles: gol }, $inc: { cantGolesFavor: 1 } }
   );
 });
 
