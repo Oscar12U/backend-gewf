@@ -8,6 +8,9 @@ const {
   Gol,
   Partido,
   Temporada,
+  ActividadJugador,
+  ActividadComentario,
+  Ausencia,
 } = require("../models");
 const cors = require("cors");
 
@@ -41,25 +44,26 @@ server.post("/api/newEntrenamiento", async (req, res) => {
   const entrenamiento = new Entrenamiento({
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
-    jugadores: req.body.jugadores,
-    comentarios: req.body.comentarios,
-    actividades: req.body.actividades,
-    fechaEntrenamiento: req.body.fechaEntrenamiento,
+    jugadores: [],
+    comentarios: [],
+    actividades: [],
+    fechaEntrenamiento: new Date(),
+    finalizado: false,
   });
 
   await entrenamiento.save();
   res.send(entrenamiento);
 });
 
-server.post("/api/newLesion", async (req, res) => {
-  const lesion = new Lesion({
-    fechaLesion: req.body.fechaLesion,
-    descripcion: req.body.descripcion,
-  });
+// server.post("/api/newLesion", async (req, res) => {
+//   const lesion = new Lesion({
+//     fechaLesion: req.body.fechaLesion,
+//     descripcion: req.body.descripcion,
+//   });
 
-  await lesion.save();
-  res.send(lesion);
-});
+//   await lesion.save();
+//   res.send(lesion);
+// });
 
 server.get("/api/lesion/:id", async (req, res) => {
   const { id } = req.params;
@@ -79,9 +83,22 @@ server.post("/api/newJugador", async (req, res) => {
     jugando: false,
     lesiones: [],
     activo: true,
+    entrenando: false,
+    ausente: false,
   });
   await jugador.save();
   res.send(jugador);
+});
+
+server.post("/api/newAusencia", async (req, res) => {
+  const ausencia = new Ausencia({
+    jugador: req.body.jugador,
+    entrenamiento: req.body.entrenamiento,
+    justificada: req.body.justificada,
+    injustificada: req.body.injustificada,
+  });
+  await ausencia.save();
+  res.send(ausencia);
 });
 
 server.post("/api/newActividad", async (req, res) => {
@@ -206,6 +223,50 @@ server.post("/api/deleteJugador", async (req, res) => {
   // return res.send({ error: false, data: jugador });
 });
 
+server.post("/api/entrenandoJugador", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+  let jugador = await Jugador.findById(req.body.jugador).then((jugador) => {
+    //console.log("todo el mae", jugador);
+    jugador.entrenando = true;
+    jugador.save().then(() => {
+      res.jsonp({ jugador }); // enviamos la boleta de vuelta
+    });
+  });
+
+  // const { nombre } = req.params;
+  // let jugador = await Jugador.findOneAndDelete(nombre);
+  // console.log(jugador);
+
+  // return res.send({ error: false, data: jugador });
+});
+
+server.post("/api/ausenteJugador", async (req, res) => {
+  let jugador = await Jugador.findById(req.body.jugador).then((jugador) => {
+    jugador.ausente = true;
+    jugador.save().then(() => {
+      res.jsonp({ jugador }); // enviamos la boleta de vuelta
+    });
+  });
+});
+
+server.post("/api/agregarJugadorPartido", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+  let entranamiento = await Entrenamiento.findById(req.body.entrenamiento).then(
+    (entranamiento) => {
+      //console.log("todo el mae", jugador);
+      entranamiento.jugadores.push(req.body.jugador);
+      entranamiento.save().then(() => {
+        res.jsonp({ entranamiento }); // enviamos la boleta de vuelta
+      });
+    }
+  );
+
+  // const { nombre } = req.params;
+  // let jugador = await Jugador.findOneAndDelete(nombre);
+  // console.log(jugador);
+
+  // return res.send({ error: false, data: jugador });
+});
 //  router.post("/posts", async (req, res) => {
 // 	const post = new Post({
 // 		title: req.body.title,
@@ -219,6 +280,127 @@ server.get("/api/jugadores/", async (req, res) => {
   let jugador = await Jugador.find();
   console.log(jugador);
   res.send({ data: jugador });
+});
+
+server.get("/api/actividad/:id", async (req, res) => {
+  const { id } = req.params;
+  let actividad = await Actividad.findById(id);
+  console.log(actividad);
+
+  return res.send({ error: false, data: actividad });
+});
+
+server.post("/api/newActividadJugador", async (req, res) => {
+  const actividadJugador = new ActividadJugador({
+    jugador: req.body.jugador,
+    entrenamiento: req.body.entrenamiento,
+    actividad: req.body.actividad,
+    minutos: req.body.minutos,
+    segundos: req.body.segundos,
+  });
+
+  await actividadJugador.save();
+  res.send(actividadJugador);
+});
+
+server.post("/api/newActividadComentario", async (req, res) => {
+  const actividadComentario = new ActividadComentario({
+    jugador: req.body.jugador,
+    entrenamiento: req.body.entrenamiento,
+    actividad: req.body.actividad,
+    comentario: req.body.comentario,
+  });
+  await actividadComentario.save();
+  res.send(actividadComentario);
+});
+
+server.post("/api/newLesion", async (req, res) => {
+  //Crear la lesion
+
+  let fecha = new Date();
+
+  const lesion = new Lesion({
+    fechaLesion: new Date(),
+    descripcion: req.body.descripcion,
+  });
+
+  await lesion.save();
+
+  //Agregar lesion al jugador en especifico
+  let jugadorActualizado = await Jugador.updateOne(
+    { _id: req.body.jugador },
+    { $push: { lesiones: lesion } }
+  );
+  res.send(jugadorActualizado);
+  // let jugadorActualizado = await Jugador.findById(req.body.jugador).then(
+  //   (jugador) => {
+  //     //console.log("todo el mae", jugador);
+  //     jugador.lesiones.push(lesion);
+  //     jugador.save().then(() => {
+  //       res.jsonp({ jugador }); // enviamos la boleta de vuelta
+  //     });
+  //   }
+  // );
+
+  //return res.send({ lesion });
+});
+
+server.post("/api/agregarComentario", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+  let entranamiento = await Entrenamiento.findById(req.body.entrenamiento).then(
+    (entranamiento) => {
+      //console.log("todo el mae", jugador);
+      entranamiento.comentarios.push(req.body.comentario);
+      entranamiento.save().then(() => {
+        res.jsonp({ entranamiento }); // enviamos la boleta de vuelta
+      });
+    }
+  );
+});
+
+server.post("/api/finalizarEntrentramiento", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+
+  //db.employee.updateMany({}, {$set: {salary: 50000}})
+
+  let jugador = await Jugador.updateMany({}, { $set: { entrenando: false } });
+  let jugador1 = await Jugador.updateMany({}, { $set: { ausente: false } });
+
+  let entranamiento = await Entrenamiento.findById(req.body.entrenamiento).then(
+    (entranamiento) => {
+      //console.log("todo el mae", jugador);
+      entranamiento.finalizado = true;
+      entranamiento.save().then(() => {
+        res.jsonp({ entranamiento }); // enviamos la boleta de vuelta
+      });
+    }
+  );
+});
+
+server.get("/api/ultimoEntrenamiento", async (req, res) => {
+  let entranamiento = await Entrenamiento.find()
+    .sort({ $natural: -1 })
+    .limit(1);
+  console.log(entranamiento);
+  res.send({ data: entranamiento });
+});
+
+server.get("/api/actividades", async (req, res) => {
+  let actividad = await Actividad.find();
+  console.log(actividad);
+  res.send({ data: actividad });
+});
+
+server.post("/api/agregarActividadEntrenamiento", async (req, res) => {
+  let entranamiento = await Entrenamiento.findById(req.body.entrenamiento).then(
+    (entranamiento) => {
+      //console.log("todo el mae", jugador);
+      entranamiento.actividades.push(req.body.actividad);
+      entranamiento.save().then(() => {
+        res.jsonp({ entranamiento }); // enviamos la boleta de vuelta
+      });
+    }
+  );
 });
 
 module.exports = server;

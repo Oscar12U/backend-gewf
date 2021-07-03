@@ -8,6 +8,7 @@ const Entrenamiento = new Schema({
   comentarios: [String],
   actividades: [{ type: Schema.Types.ObjectId, ref: "actividad" }],
   fechaEntrenamiento: { type: Date },
+  finalizado: { type: Boolean },
 });
 
 module.exports = mongoose.model("entrenamiento", Entrenamiento);

@@ -5,7 +5,8 @@ module.exports = {
   Actividad: require("./actividad"),
   Partido: require("./Partido"),
   Gol: require("./Gol"),
-  Temporada: require("./Temporada")
+  Temporada: require("./Temporada"),
+  ActividadJugador: require("./ActividadJugador"),
+  ActividadComentario: require("./ActividadComentario"),
+  Ausencia: require("./Ausencia.js"),
 };
-
-
