@@ -12,6 +12,7 @@ const Jugador = new Schema({
   activo: { type: Boolean },
   entrenando: { type: Boolean },
   ausente: { type: Boolean },
+  convocado: { type: Boolean },
 });
 
 module.exports = mongoose.model("jugador", Jugador);

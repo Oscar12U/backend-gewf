@@ -81,6 +81,7 @@ server.post("/api/newJugador", async (req, res) => {
     tiempoMinutosJuego: 0,
     cantFaltas: 0,
     jugando: false,
+    convocado: false,
     lesiones: [],
     activo: true,
     entrenando: false,
@@ -139,6 +140,20 @@ server.get("/api/jugador/:id", async (req, res) => {
   return res.send({ error: false, data: jugador });
 });
 
+server.post("/api/newFalta", async (req, res) => {
+  //Agregar la falta al jugador
+
+  let jugadorActualizado = await Jugador.updateOne(
+    { nombre: req.body.nombreJugador },
+    { $inc: { cantFaltas: 1 } }
+  );
+  //Agregar la falta al partido
+  let PartidoActualizado = await Partido.updateOne(
+    { nombre: req.body.nombrePartido },
+    { $inc: { faltas: 1 } }
+  );
+});
+
 server.post("/api/newGolContra", async (req, res) => {
   //Agregar el gol en contra al partido especifico
 
@@ -150,19 +165,19 @@ server.post("/api/newGolContra", async (req, res) => {
 
 server.post("/api/newGolFavor", async (req, res) => {
   let anotadorActualizado = await Jugador.updateOne(
-    { _id: req.body.anotador },
+    { nombre: req.body.anotador },
     { $inc: { cantGoles: 1 } }
   );
 
-  let anotador = await Jugador.findById(req.body.anotador);
+  let anotador = await Jugador.findOne({ nombre: req.body.anotador });
 
   //Obtener el jugador asistente
 
   let asistenteActualizado = await Jugador.updateOne(
-    { _id: req.body.asistente },
+    { nombre: req.body.asistente },
     { $inc: { cantAsistencias: 1 } }
   );
-  let asistente = await Jugador.findById(req.body.asistente);
+  let asistente = await Jugador.findOne({ nombre: req.body.asistente });
 
   // Crear Gol
   const gol = new Gol({
@@ -183,13 +198,91 @@ server.post("/api/newGolFavor", async (req, res) => {
 });
 
 server.post("/api/newPartido", async (req, res) => {
+  //Crear un nuevo Partido
   const partido = new Partido({
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
     fechaPartido: req.body.fechaPartido,
   });
   await partido.save();
+
+  //Agregar el Partido a la temporada en especifico
+  let temporadaActualizada = await Temporada.updateOne(
+    { nombre: req.body.nombreTemporada },
+    { $push: { partidos: partido } }
+  );
   res.send(partido);
+});
+
+server.post("/api/addJugador", async (req, res) => {
+  //ObtenerJugador
+
+  let jugador = await Jugador.findOne({
+    nombre: req.body.nombreJugador,
+  });
+  //Agregar el Jugador al Partido en especifico
+
+  if (!jugador.convocado) {
+    let partidoaActualizado = await Partido.updateOne(
+      { nombre: req.body.nombrePartido },
+      { $push: { jugadores: jugador } }
+    );
+    console.log("No esta convocado " + jugador.nombre);
+  }
+
+  let JugadorActualizado = await Jugador.updateOne(
+    { nombre: jugador.nombre },
+    { $set: { jugando: req.body.titular, convocado: true } }
+  );
+
+  res.send({ jugador });
+});
+
+server.post("/api/quitJugador", async (req, res) => {
+  //ObtenerJugador
+
+  let JugadorActualizado = await Jugador.updateOne(
+    { nombre: req.body.nombreJugador },
+    { $set: { jugando: false } }
+  );
+
+  res.send({ msg: "Jugador cambiado con exito" });
+});
+
+server.post("/api/removeJugadorPartido", async (req, res) => {
+  //ObtenerJugador
+
+  let JugadorActualizado = await Jugador.updateOne(
+    { nombre: req.body.nombreJugador },
+    { $set: { jugando: false, convocado: false } }
+  );
+
+  let jugador = await Jugador.findOne({
+    nombre: req.body.nombreJugador,
+  });
+
+  let partidoaActualizado = await Partido.updateOne(
+    { nombre: req.body.nombrePartido },
+    { $pull: { jugadores: jugador.id } }
+  );
+
+  res.send({ msg: "Jugador eliminado con exito" });
+});
+
+server.post("/api/changeJugador", async (req, res) => {
+  //ObtenerJugador
+
+  let JugadorEntraActualizado = await Jugador.updateOne(
+    { nombre: req.body.entra },
+    { $set: { jugando: true } }
+  );
+
+  let JugadorSaleActualizado = await Jugador.updateOne(
+    { nombre: req.body.sale },
+    { $set: { jugando: false } }
+  );
+
+  res.send({ msg: "Jugador cambiado" });
 });
 
 server.post("/api/newTemporada", async (req, res) => {
@@ -276,9 +369,8 @@ server.post("/api/agregarJugadorPartido", async (req, res) => {
 // 	res.send(post)
 // })
 
-server.get("/api/jugadores/", async (req, res) => {
+server.get("/api/jugadores", async (req, res) => {
   let jugador = await Jugador.find();
-  console.log(jugador);
   res.send({ data: jugador });
 });
 
@@ -401,6 +493,14 @@ server.post("/api/agregarActividadEntrenamiento", async (req, res) => {
       });
     }
   );
+});
+server.get("/api/detallesPartido/:nombrePartido", async (req, res) => {
+  const { nombrePartido } = req.params;
+  let partido = await Partido.findOne({
+    nombre: nombrePartido,
+  });
+  console.log(partido);
+  res.send({ data: partido });
 });
 
 module.exports = server;
