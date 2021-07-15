@@ -41,6 +41,8 @@ server.get("/api/entrenamientos/search/:name", async (req, res) => {
 });
 
 server.post("/api/newEntrenamiento", async (req, res) => {
+  let jugador = await Jugador.updateMany({}, { $set: { entrenando: false } });
+  let jugador1 = await Jugador.updateMany({}, { $set: { ausente: false } });
   const entrenamiento = new Entrenamiento({
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
@@ -535,15 +537,13 @@ server.post("/api/newLesionNombre", async (req, res) => {
 });
 
 server.get("/api/ultimaTemporada", async (req, res) => {
-  let temporada = await Temporada.find()
-    .sort({ $natural: -1 })
-    .limit(1);
+  let temporada = await Temporada.find().sort({ $natural: -1 }).limit(1);
   console.log(temporada);
   res.send({ data: temporada });
 });
 
 server.get("/api/getAllTemporadas", async (req, res) => {
   let temporadas = await Temporada.find();
-  res.send({ data: temporadas })
-})
+  res.send({ data: temporadas });
+});
 module.exports = server;
