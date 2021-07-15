@@ -199,10 +199,18 @@ server.post("/api/newGolFavor", async (req, res) => {
 
 server.post("/api/newPartido", async (req, res) => {
   //Crear un nuevo Partido
+  let fechaReal = new Date(req.body.fechaPartido);
+  console.log("Aqui: " + req.body.fechaPartido);
   const partido = new Partido({
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
-    fechaPartido: req.body.fechaPartido,
+    fechaPartido: fechaReal,
+    cantGolesFavor: 0,
+    cantGolesContra: 0,
+    faltasAFavor: 0,
+    faltasEnContra: 0,
+    jugadores: [],
+    goles: [],
   });
   await partido.save();
 
@@ -286,11 +294,15 @@ server.post("/api/changeJugador", async (req, res) => {
 });
 
 server.post("/api/newTemporada", async (req, res) => {
+  let fechaReal1 = new Date(req.body.fechaInicio);
+  let fechaReal2 = new Date(req.body.fechaFin);
+  //console.log("Primera Fecha" + fechaReal1);
+  //console.log("Segunda Fecha" + fechaReal2);
   const temporada = new Temporada({
     nombre: req.body.nombre,
     descripcion: req.body.descripcion,
-    fechainicio: req.body.fechainicio,
-    fechaFin: req.body.fechaFin,
+    fechaInicio: fechaReal1,
+    fechaFin: fechaReal2,
     partidos: req.body.partidos,
     entrenamientos: req.body.entrenamientos,
   });
@@ -501,6 +513,25 @@ server.get("/api/detallesPartido/:nombrePartido", async (req, res) => {
   });
   console.log(partido);
   res.send({ data: partido });
+});
+
+server.post("/api/newLesionNombre", async (req, res) => {
+  //Crear la lesion
+
+  let fecha = new Date();
+
+  const lesion = new Lesion({
+    fechaLesion: new Date(),
+    descripcion: req.body.descripcion,
+  });
+
+  await lesion.save();
+
+  //Agregar lesion al jugador en especifico
+  let jugadorActualizado = await Jugador.updateOne(
+    { nombre: req.body.nombreJugador },
+    { $push: { lesiones: lesion } }
+  );
 });
 
 module.exports = server;
