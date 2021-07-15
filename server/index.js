@@ -534,4 +534,16 @@ server.post("/api/newLesionNombre", async (req, res) => {
   );
 });
 
+server.get("/api/ultimaTemporada", async (req, res) => {
+  let temporada = await Temporada.find()
+    .sort({ $natural: -1 })
+    .limit(1);
+  console.log(temporada);
+  res.send({ data: temporada });
+});
+
+server.get("/api/getAllTemporadas", async (req, res) => {
+  let temporadas = await Temporada.find();
+  res.send({ data: temporadas })
+})
 module.exports = server;
