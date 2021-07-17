@@ -11,6 +11,7 @@ const Partido = new Schema({
   jugadores: [{ type: Schema.Types.ObjectId, ref: "jugador" }],
   goles: [{ type: Schema.Types.ObjectId, ref: "gol" }],
   fechaPartido: { type: Date },
+  finalizado: { type: Boolean },
 });
 
 module.exports = mongoose.model("partido", Partido);

@@ -201,6 +201,9 @@ server.post("/api/newGolFavor", async (req, res) => {
 
 server.post("/api/newPartido", async (req, res) => {
   //Crear un nuevo Partido
+  let jugador = await Jugador.updateMany({}, { $set: { entrenando: false } });
+  let jugador1 = await Jugador.updateMany({}, { $set: { ausente: false } });
+
   let fechaReal = new Date(req.body.fechaPartido);
   console.log("Aqui: " + req.body.fechaPartido);
   const partido = new Partido({
@@ -213,6 +216,7 @@ server.post("/api/newPartido", async (req, res) => {
     faltasEnContra: 0,
     jugadores: [],
     goles: [],
+    finalizado: false,
   });
   await partido.save();
 
@@ -225,7 +229,7 @@ server.post("/api/newPartido", async (req, res) => {
 });
 
 server.post("/api/addJugador", async (req, res) => {
-  //ObtenerJugador
+  //ObtenerJugadorde
 
   let jugador = await Jugador.findOne({
     nombre: req.body.nombreJugador,
@@ -483,6 +487,23 @@ server.post("/api/finalizarEntrentramiento", async (req, res) => {
   );
 });
 
+server.post("/api/finalizarPartido", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+
+  //db.employee.updateMany({}, {$set: {salary: 50000}})
+
+  let jugador = await Jugador.updateMany({}, { $set: { jugando: false } });
+  let jugador1 = await Jugador.updateMany({}, { $set: { convocado: false } });
+
+  let partido = await Partido.findById(req.body.partido).then((partido) => {
+    //console.log("todo el mae", jugador);
+    partido.finalizado = true;
+    partido.save().then(() => {
+      res.jsonp({ partido }); // enviamos la boleta de vuelta
+    });
+  });
+});
+
 server.get("/api/ultimoEntrenamiento", async (req, res) => {
   let entranamiento = await Entrenamiento.find()
     .sort({ $natural: -1 })
@@ -546,4 +567,69 @@ server.get("/api/getAllTemporadas", async (req, res) => {
   let temporadas = await Temporada.find();
   res.send({ data: temporadas });
 });
+
+server.get("/api/getEntrenamiento/:id", async (req, res) => {
+  const { id } = req.params;
+  let entrenamiento = await Entrenamiento.findById(id);
+  console.log(entrenamiento);
+
+  return res.send({ error: false, data: entrenamiento });
+});
+
+server.get("/api/getPartido/:id", async (req, res) => {
+  const { id } = req.params;
+  let partido = await Partido.findById(id);
+  console.log(partido);
+
+  return res.send({ error: false, data: partido });
+});
+
+server.get("/api/golEspecifico/:id", async (req, res) => {
+  const { id } = req.params;
+  let gol = await Gol.findById(id);
+  console.log(gol);
+
+  return res.send({ error: false, data: gol });
+});
+
+server.get("/api/ausencia", async (req, res) => {
+  let ausencia = await Ausencia.find();
+  console.log(ausencia);
+  res.send({ data: ausencia });
+});
+
+server.post("/api/agregarEntrenamientoTempo", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+
+  let entranamiento = await Entrenamiento.find()
+    .sort({ $natural: -1 })
+    .limit(1);
+  //console.log(entranamiento);
+  let temporada = await Temporada.findById(req.body.temporada).then(
+    (temporada) => {
+      //console.log("todo el mae", jugador);
+      temporada.entrenamientos.push(entranamiento[0]._id);
+      temporada.save().then(() => {
+        res.jsonp({ temporada }); // enviamos la boleta de vuelta
+      });
+    }
+  );
+});
+
+server.post("/api/agregarPartidoTempo", async (req, res) => {
+  //console.log("estoy aqui", req.body.jugador);
+
+  let partido = await Partido.find().sort({ $natural: -1 }).limit(1);
+  //console.log(entranamiento);
+  let temporada = await Temporada.findById(req.body.temporada).then(
+    (temporada) => {
+      //console.log("todo el mae", jugador);
+      temporada.partidos.push(partido[0]._id);
+      temporada.save().then(() => {
+        res.jsonp({ temporada }); // enviamos la boleta de vuelta
+      });
+    }
+  );
+});
+
 module.exports = server;
