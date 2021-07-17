@@ -142,7 +142,7 @@ server.get("/api/jugador/:id", async (req, res) => {
   return res.send({ error: false, data: jugador });
 });
 
-server.post("/api/newFalta", async (req, res) => {
+server.post("/api/newFaltaAFavor", async (req, res) => {
   //Agregar la falta al jugador
 
   let jugadorActualizado = await Jugador.updateOne(
@@ -152,7 +152,15 @@ server.post("/api/newFalta", async (req, res) => {
   //Agregar la falta al partido
   let PartidoActualizado = await Partido.updateOne(
     { nombre: req.body.nombrePartido },
-    { $inc: { faltas: 1 } }
+    { $inc: { faltasAFavor: 1 } }
+  );
+});
+
+server.post("/api/newFaltaEnContra", async (req, res) => {
+  //Agregar la falta al partido
+  let PartidoActualizado = await Partido.updateOne(
+    { nombre: req.body.nombrePartido },
+    { $inc: { faltasEnContra: 1 } }
   );
 });
 
