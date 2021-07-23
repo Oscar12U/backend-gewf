@@ -182,12 +182,14 @@ server.post("/api/newGolFavor", async (req, res) => {
   let anotador = await Jugador.findOne({ nombre: req.body.anotador });
 
   //Obtener el jugador asistente
-
-  let asistenteActualizado = await Jugador.updateOne(
-    { nombre: req.body.asistente },
-    { $inc: { cantAsistencias: 1 } }
-  );
-  let asistente = await Jugador.findOne({ nombre: req.body.asistente });
+  let asistente = null;
+  if (req.body.asistenteBool) {
+    let asistenteActualizado = await Jugador.updateOne(
+      { nombre: req.body.asistente },
+      { $inc: { cantAsistencias: 1 } }
+    );
+    asistente = await Jugador.findOne({ nombre: req.body.asistente });
+  }
 
   // Crear Gol
   const gol = new Gol({
