@@ -182,12 +182,14 @@ server.post("/api/newGolFavor", async (req, res) => {
   let anotador = await Jugador.findOne({ nombre: req.body.anotador });
 
   //Obtener el jugador asistente
-
-  let asistenteActualizado = await Jugador.updateOne(
-    { nombre: req.body.asistente },
-    { $inc: { cantAsistencias: 1 } }
-  );
-  let asistente = await Jugador.findOne({ nombre: req.body.asistente });
+  let asistente = null;
+  if (req.body.asistenteBool) {
+    let asistenteActualizado = await Jugador.updateOne(
+      { nombre: req.body.asistente },
+      { $inc: { cantAsistencias: 1 } }
+    );
+    asistente = await Jugador.findOne({ nombre: req.body.asistente });
+  }
 
   // Crear Gol
   const gol = new Gol({
@@ -496,15 +498,24 @@ server.post("/api/finalizarEntrentramiento", async (req, res) => {
 });
 
 server.post("/api/finalizarPartido", async (req, res) => {
-  //console.log("estoy aqui", req.body.jugador);
+  ////con("estoy aqui", req.body.jugador);
 
   //db.employee.updateMany({}, {$set: {salary: 50000}})
+
+  let arrayTiempos = req.body.tiempos;
+
+  arrayTiempos.map(async (tiempo) => {
+    let jugadorAct = await Jugador.updateOne(
+      { nombre: tiempo.nombreJugador },
+      { $inc: { tiempoMinutosJuego: tiempo.tiempoMin } }
+    );
+  });
 
   let jugador = await Jugador.updateMany({}, { $set: { jugando: false } });
   let jugador1 = await Jugador.updateMany({}, { $set: { convocado: false } });
 
   let partido = await Partido.findById(req.body.partido).then((partido) => {
-    //console.log("todo el mae", jugador);
+    ////con("todo el mae", jugador);
     partido.finalizado = true;
     partido.save().then(() => {
       res.jsonp({ partido }); // enviamos la boleta de vuelta
