@@ -501,9 +501,17 @@ server.post("/api/finalizarPartido", async (req, res) => {
   //console.log("estoy aqui", req.body.jugador);
 
   //db.employee.updateMany({}, {$set: {salary: 50000}})
-
+  console.log(req.body.tiempos);
   let jugador = await Jugador.updateMany({}, { $set: { jugando: false } });
   let jugador1 = await Jugador.updateMany({}, { $set: { convocado: false } });
+
+  req.body.tiempos.map(async (jugadorTimer) => {
+    let jugadorUpdate = await Jugador.updateOne(
+      { nombre: jugadorTimer.nombreJugador },
+      { $push: { tiempoMinutosJuego: jugadorTimer.tiempoMin } }
+    );
+    console.log(jugadorUpdate);
+  });
 
   let partido = await Partido.findById(req.body.partido).then((partido) => {
     //console.log("todo el mae", jugador);
