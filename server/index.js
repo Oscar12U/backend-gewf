@@ -498,19 +498,10 @@ server.post("/api/finalizarEntrentramiento", async (req, res) => {
 });
 
 server.post("/api/finalizarPartido", async (req, res) => {
-  ////con("estoy aqui", req.body.jugador);
+  //console.log("estoy aqui", req.body.jugador);
 
   //db.employee.updateMany({}, {$set: {salary: 50000}})
-
-  let arrayTiempos = req.body.tiempos;
-
-  arrayTiempos.map(async (tiempo) => {
-    let jugadorAct = await Jugador.updateOne(
-      { nombre: tiempo.nombreJugador },
-      { $inc: { tiempoMinutosJuego: tiempo.tiempoMin } }
-    );
-  });
-
+  console.log(req.body.tiempos);
   let jugador = await Jugador.updateMany({}, { $set: { jugando: false } });
   let jugador1 = await Jugador.updateMany({}, { $set: { convocado: false } });
 
@@ -523,7 +514,7 @@ server.post("/api/finalizarPartido", async (req, res) => {
   });
 
   let partido = await Partido.findById(req.body.partido).then((partido) => {
-    ////con("todo el mae", jugador);
+    //console.log("todo el mae", jugador);
     partido.finalizado = true;
     partido.save().then(() => {
       res.jsonp({ partido }); // enviamos la boleta de vuelta
