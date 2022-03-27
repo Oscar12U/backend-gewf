@@ -514,6 +514,14 @@ server.post("/api/finalizarPartido", async (req, res) => {
   let jugador = await Jugador.updateMany({}, { $set: { jugando: false } });
   let jugador1 = await Jugador.updateMany({}, { $set: { convocado: false } });
 
+  req.body.tiempos.map(async (jugadorTimer) => {
+    let jugadorUpdate = await Jugador.updateOne(
+      { nombre: jugadorTimer.nombreJugador },
+      { $push: { tiempoMinutosJuego: jugadorTimer.tiempoMin } }
+    );
+    console.log(jugadorUpdate);
+  });
+
   let partido = await Partido.findById(req.body.partido).then((partido) => {
     ////con("todo el mae", jugador);
     partido.finalizado = true;
